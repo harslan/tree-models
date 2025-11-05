@@ -1,0 +1,1445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tree-Based Models in Prescriptive Analytics | ISOM 839</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/reveal.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/theme/white.min.css" id="theme">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css">
+    
+    <style>
+        :root {
+            --color-lr: #3498db;
+            --color-rf: #2ecc71;
+            --color-gb: #f39c12;
+            --color-accent: #e74c3c;
+            --color-dark: #2c3e50;
+            --color-light: #ecf0f1;
+        }
+        
+        .reveal {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-size: 32px; /* Base font size for scaling */
+        }
+        
+        .reveal h1, .reveal h2, .reveal h3 {
+            color: var(--color-dark);
+            text-transform: none;
+            font-weight: 700;
+            line-height: 1.2;
+        }
+        
+        .reveal h1 {
+            font-size: 1.8em;
+            margin-bottom: 0.3em;
+        }
+        
+        .reveal h2 {
+            font-size: 1.4em;
+            margin-bottom: 0.3em;
+        }
+        
+        .reveal h3 {
+            font-size: 1.1em;
+            color: var(--color-accent);
+            margin-bottom: 0.3em;
+        }
+        
+        .reveal section {
+            text-align: left;
+            padding: 10px 20px;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+        }
+        
+        .reveal p, .reveal li {
+            font-size: 0.8em;
+            line-height: 1.4;
+            margin-bottom: 0.5em;
+        }
+        
+        .reveal ul, .reveal ol {
+            margin: 0.5em 0;
+        }
+        
+        .reveal section.center {
+            text-align: center;
+        }
+        
+        .reveal .title-slide h1 {
+            font-size: 2em;
+            color: var(--color-dark);
+            margin-bottom: 0.2em;
+        }
+        
+        .reveal .subtitle {
+            font-size: 1em;
+            color: #7f8c8d;
+            margin-bottom: 1em;
+        }
+        
+        .pipeline {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            margin: 1em 0;
+            font-size: 0.6em;
+            flex-wrap: wrap;
+        }
+        
+        .pipeline-box {
+            background: var(--color-light);
+            border: 3px solid var(--color-dark);
+            border-radius: 10px;
+            padding: 15px 10px;
+            min-width: 150px;
+            max-width: 200px;
+            text-align: center;
+            font-weight: bold;
+            margin: 5px;
+            flex: 1;
+        }
+        
+        .pipeline-arrow {
+            font-size: 1.5em;
+            color: var(--color-accent);
+            font-weight: bold;
+            margin: 0 5px;
+        }
+        
+        .model-comparison {
+            width: 100%;
+            margin: 1em 0;
+            border-collapse: collapse;
+            font-size: 0.7em;
+        }
+        
+        .model-comparison th {
+            background: var(--color-dark);
+            color: white;
+            padding: 8px 6px;
+            text-align: left;
+            font-size: 0.9em;
+        }
+        
+        .model-comparison td {
+            padding: 6px;
+            border-bottom: 1px solid #ddd;
+            font-size: 0.95em;
+        }
+        
+        .model-comparison tr:hover {
+            background: var(--color-light);
+        }
+        
+        .highlight-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin: 0.8em 0;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            font-size: 0.9em;
+        }
+        
+        .highlight-box h3 {
+            color: white;
+            margin-top: 0;
+            font-size: 1.1em;
+        }
+        
+        .code-example {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 0.55em;
+            overflow-x: auto;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .two-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            align-items: start;
+            font-size: 0.85em;
+        }
+        
+        .pros-cons {
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 0.95em;
+        }
+        
+        .pros {
+            background: #d4edda;
+            border-left: 5px solid #28a745;
+        }
+        
+        .cons {
+            background: #f8d7da;
+            border-left: 5px solid #dc3545;
+        }
+        
+        .star-rating {
+            color: #f39c12;
+        }
+        
+        .big-number {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: var(--color-accent);
+            text-align: center;
+            margin: 0.3em 0;
+        }
+        
+        .checklist {
+            list-style: none;
+            padding-left: 0;
+            font-size: 0.85em;
+            line-height: 1.5;
+        }
+        
+        .checklist li:before {
+            content: "✅ ";
+            color: var(--color-rf);
+            font-size: 1em;
+            margin-right: 8px;
+        }
+        
+        .warning-box {
+            background: #fff3cd;
+            border-left: 5px solid #ffc107;
+            padding: 15px;
+            margin: 0.8em 0;
+            font-size: 0.9em;
+        }
+        
+        .quote {
+            font-style: italic;
+            font-size: 1.1em;
+            color: #555;
+            border-left: 5px solid var(--color-accent);
+            padding-left: 20px;
+            margin: 1em 0;
+        }
+        
+        .emoji-large {
+            font-size: 2em;
+        }
+        
+        .fragment.highlight-current-blue .visible {
+            color: var(--color-lr);
+        }
+        
+        .reveal .progress {
+            height: 5px;
+            background: var(--color-accent);
+        }
+        
+        @media (max-width: 768px) {
+            .reveal {
+                font-size: 24px; /* Smaller base font on mobile */
+            }
+            
+            .two-column {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+            
+            .pipeline {
+                flex-direction: column;
+                font-size: 0.7em;
+            }
+            
+            .pipeline-arrow {
+                transform: rotate(90deg);
+                margin: 5px 0;
+            }
+            
+            .pipeline-box {
+                min-width: 120px;
+                padding: 10px;
+            }
+            
+            .model-comparison {
+                font-size: 0.55em;
+            }
+            
+            .model-comparison th,
+            .model-comparison td {
+                padding: 4px 2px;
+            }
+            
+            .code-example {
+                font-size: 0.45em;
+                padding: 10px;
+            }
+            
+            .reveal h1 {
+                font-size: 1.5em;
+            }
+            
+            .reveal h2 {
+                font-size: 1.2em;
+            }
+            
+            .reveal h3 {
+                font-size: 1em;
+            }
+            
+            .big-number {
+                font-size: 2em;
+            }
+            
+            .emoji-large {
+                font-size: 1.5em;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .reveal {
+                font-size: 20px; /* Even smaller on very small screens */
+            }
+            
+            .reveal section {
+                padding: 5px 10px;
+            }
+            
+            .model-comparison {
+                font-size: 0.5em;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="reveal">
+        <div class="slides">
+            
+            <!-- Slide 1: Title -->
+            <section class="center title-slide" data-background-gradient="linear-gradient(135deg, #667eea 0%, #764ba2 100%)">
+                <h1 style="color: white;">🌲 Tree-Based Models in Prescriptive Analytics</h1>
+                <p class="subtitle" style="color: #f0f0f0;">From Prediction to Optimization</p>
+                <p style="color: white; font-size: 1.2em;">ISOM 839: Prescriptive Analytics</p>
+                <p style="color: #ddd; margin-top: 2em;">Press → or SPACE to navigate</p>
+            </section>
+
+            <!-- Slide 2: Tonight's Journey -->
+            <section>
+                <h2>Tonight's Journey</h2>
+                <div class="highlight-box">
+                    <p style="font-size: 1.5em; text-align: center; margin: 0;">
+                        Better Predictions → Better Decisions → Better Business Outcomes
+                    </p>
+                </div>
+                
+                <h3 style="margin-top: 1em;">Learning Objectives:</h3>
+                <ul class="checklist">
+                    <li>Master Random Forest & Gradient Boosting</li>
+                    <li>Integrate ML models with optimization</li>
+                    <li>Evaluate prediction-optimization trade-offs</li>
+                    <li>Think critically about model selection</li>
+                </ul>
+            </section>
+
+            <!-- Slide 3: The Central Question -->
+            <section class="center">
+                <h2>The Central Question</h2>
+                <div class="big-number">🤔</div>
+                <p style="font-size: 1.5em; color: var(--color-accent);">
+                    What if we could predict demand MORE accurately?
+                </p>
+                <ul style="font-size: 1.2em; list-style: none; padding-left: 0; text-align: center;">
+                    <li class="fragment">Would our optimal prices change?</li>
+                    <li class="fragment">Would revenue increase?</li>
+                    <li class="fragment">Is the complexity worth it?</li>
+                </ul>
+                <p class="fragment" style="font-size: 1.3em; margin-top: 1em; color: var(--color-rf); font-weight: bold;">
+                    We'll answer this with REAL optimization results!
+                </p>
+            </section>
+
+            <!-- Slide 4: The Pipeline -->
+            <section>
+                <h2>The Prescriptive Analytics Pipeline</h2>
+                <div class="pipeline">
+                    <div class="pipeline-box">
+                        <p>📊<br>Historical<br>Data</p>
+                        <small>Descriptive</small>
+                    </div>
+                    <div class="pipeline-arrow">➔</div>
+                    <div class="pipeline-box" style="background: #d4edda;">
+                        <p>🤖<br>ML Model<br>(Prediction)</p>
+                        <small>Predictive</small>
+                    </div>
+                    <div class="pipeline-arrow">➔</div>
+                    <div class="pipeline-box" style="background: #cce5ff;">
+                        <p>⚡<br>Optimization<br>(Decision)</p>
+                        <small>Prescriptive</small>
+                    </div>
+                </div>
+                
+                <div class="highlight-box" style="margin-top: 2em;">
+                    <p style="font-size: 1.3em; text-align: center; margin: 0;">
+                        <strong>Key Insight:</strong> Quality of predictions directly affects quality of decisions!
+                    </p>
+                </div>
+            </section>
+
+            <!-- Slide 5: Decision Tree Basics -->
+            <section>
+                <h2>Single Decision Tree: The Building Block</h2>
+                <div class="two-column">
+                    <div>
+                        <h3>Like a Flowchart:</h3>
+                        <pre style="font-size: 0.6em; line-height: 1.4;">
+                Is price < $1.50?
+                /              \
+              YES              NO
+              /                 \
+      Is peak season?    Is region = West?
+        /      \             /          \
+      YES      NO          YES          NO
+       |        |           |            |
+    Predict  Predict    Predict      Predict
+    3.2M     2.1M       1.8M         1.5M
+                        </pre>
+                    </div>
+                    <div>
+                        <div class="pros-cons pros">
+                            <strong>✅ Advantages:</strong>
+                            <ul>
+                                <li>Easy to interpret</li>
+                                <li>Handles non-linearity</li>
+                                <li>No feature scaling needed</li>
+                            </ul>
+                        </div>
+                        <div class="pros-cons cons" style="margin-top: 1em;">
+                            <strong>❌ Limitations:</strong>
+                            <ul>
+                                <li>High variance</li>
+                                <li>Overfits easily</li>
+                                <li>Unstable</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="warning-box" style="margin-top: 1em;">
+                    <p style="margin: 0; font-size: 1.2em; text-align: center;">
+                        <strong>Question:</strong> Would you trust ONE expert or 100 experts? 🤔
+                    </p>
+                </div>
+            </section>
+
+            <!-- Slide 6: Random Forest Concept -->
+            <section>
+                <h2>🌲🌲🌲 Random Forest: Wisdom of the Crowd</h2>
+                <h3>Core Idea: Build many trees, average predictions</h3>
+                
+                <div style="margin: 2em 0;">
+                    <div style="background: var(--color-light); padding: 20px; border-radius: 10px; margin-bottom: 1em;">
+                        <strong>1. Bootstrap Sampling (Bagging)</strong>
+                        <p>Create 100 different training datasets by random sampling WITH replacement</p>
+                    </div>
+                    
+                    <div style="background: var(--color-light); padding: 20px; border-radius: 10px; margin-bottom: 1em;">
+                        <strong>2. Random Feature Selection</strong>
+                        <p>At each split, consider only a random subset of features (decorrelates trees)</p>
+                    </div>
+                    
+                    <div style="background: var(--color-light); padding: 20px; border-radius: 10px;">
+                        <strong>3. Average Predictions</strong>
+                        <p>Regression: Average all tree predictions | Classification: Majority vote</p>
+                    </div>
+                </div>
+                
+                <div class="highlight-box">
+                    <p style="text-align: center; margin: 0; font-size: 1.2em;">
+                        <strong>Why it works:</strong> Individual errors cancel out!<br>
+                        Math: Error ∝ 1/√n trees
+                    </p>
+                </div>
+            </section>
+
+            <!-- Slide 7: RF Architecture -->
+            <section>
+                <h2>Random Forest Architecture</h2>
+                <div class="code-example">
+<pre><code class="language-python">from sklearn.ensemble import RandomForestRegressor
+
+rf_model = RandomForestRegressor(
+    n_estimators=100,      # Number of trees (more = more stable)
+    max_depth=None,        # How deep trees can grow
+    max_features='sqrt',   # Features to consider per split
+    random_state=42        # For reproducibility
+)
+
+rf_model.fit(X_train, y_train)
+predictions = rf_model.predict(X_test)
+</code></pre>
+                </div>
+                
+                <div style="margin-top: 2em; display: flex; justify-content: space-around; text-align: center;">
+                    <div style="flex: 1; padding: 15px;">
+                        <div class="emoji-large">🌳</div>
+                        <p>Tree 1<br><small>Data Subset A</small></p>
+                    </div>
+                    <div style="flex: 1; padding: 15px;">
+                        <div class="emoji-large">🌳</div>
+                        <p>Tree 2<br><small>Data Subset B</small></p>
+                    </div>
+                    <div style="flex: 1; padding: 15px;">
+                        <div class="emoji-large">...</div>
+                        <p>...</p>
+                    </div>
+                    <div style="flex: 1; padding: 15px;">
+                        <div class="emoji-large">🌳</div>
+                        <p>Tree 100<br><small>Data Subset Z</small></p>
+                    </div>
+                </div>
+                
+                <p style="text-align: center; font-size: 1.5em; margin-top: 1em;">
+                    ⬇️<br>
+                    <strong>Average All Predictions</strong><br>
+                    ⬇️<br>
+                    <span style="color: var(--color-rf);">Final Prediction ✨</span>
+                </p>
+            </section>
+
+            <!-- Slide 8: Gradient Boosting Concept -->
+            <section>
+                <h2>🚀 Gradient Boosting: Learning from Mistakes</h2>
+                <h3>Different Philosophy from Random Forest</h3>
+                
+                <div class="two-column">
+                    <div style="background: #e8f5e9; padding: 20px; border-radius: 10px;">
+                        <strong style="color: var(--color-rf);">Random Forest:</strong>
+                        <ul>
+                            <li>Trees built independently</li>
+                            <li>Parallel processing</li>
+                            <li>Reduce variance</li>
+                        </ul>
+                    </div>
+                    <div style="background: #fff3e0; padding: 20px; border-radius: 10px;">
+                        <strong style="color: var(--color-gb);">Gradient Boosting:</strong>
+                        <ul>
+                            <li>Trees built sequentially</li>
+                            <li>Each learns from errors</li>
+                            <li>Reduce bias</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <h3 style="margin-top: 1.5em;">The Algorithm:</h3>
+                <ol style="line-height: 1.8;">
+                    <li><strong>Start simple:</strong> Make initial prediction (e.g., mean)</li>
+                    <li><strong>Calculate errors:</strong> Find residuals (actual - predicted)</li>
+                    <li><strong>Build tree to predict errors:</strong> Focus on mistakes</li>
+                    <li><strong>Update:</strong> prediction += learning_rate × error_prediction</li>
+                    <li><strong>Repeat 100 times</strong></li>
+                </ol>
+            </section>
+
+            <!-- Slide 9: GB Sequential Learning -->
+            <section>
+                <h2>Gradient Boosting: Sequential Improvement</h2>
+                
+                <div style="margin: 2em 0;">
+                    <div style="background: #ffebee; padding: 15px; border-radius: 8px; margin-bottom: 1em;">
+                        <strong>Iteration 1:</strong> Predict 2.5M everywhere → <span style="color: #d32f2f;">Errors: ±0.5M</span>
+                    </div>
+                    
+                    <div style="background: #fff3e0; padding: 15px; border-radius: 8px; margin-bottom: 1em;">
+                        <strong>Iteration 2:</strong> Build tree to fix errors → <span style="color: #f57c00;">New errors: ±0.3M</span>
+                    </div>
+                    
+                    <div style="background: #fff9c4; padding: 15px; border-radius: 8px; margin-bottom: 1em;">
+                        <strong>Iteration 3:</strong> Build tree to fix NEW errors → <span style="color: #f9a825;">New errors: ±0.1M</span>
+                    </div>
+                    
+                    <div style="text-align: center; font-size: 1.5em; margin: 1em 0;">...</div>
+                    
+                    <div style="background: #e8f5e9; padding: 15px; border-radius: 8px;">
+                        <strong>Iteration 100:</strong> Very accurate predictions! → <span style="color: #388e3c;">Errors: ±0.02M ✨</span>
+                    </div>
+                </div>
+                
+                <div class="code-example" style="margin-top: 1.5em;">
+<pre><code class="language-python">from sklearn.ensemble import GradientBoostingRegressor
+
+gb_model = GradientBoostingRegressor(
+    n_estimators=100,      # Number of boosting rounds
+    learning_rate=0.1,     # How much each tree contributes
+    max_depth=3,           # Shallow trees work best (3-6)
+    random_state=42
+)
+</code></pre>
+                </div>
+            </section>
+
+            <!-- Slide 10: Model Comparison -->
+            <section>
+                <h2>📊 Model Comparison: Prediction Performance</h2>
+                
+                <table class="model-comparison">
+                    <thead>
+                        <tr>
+                            <th>Model</th>
+                            <th>R² Score</th>
+                            <th>MAE (millions)</th>
+                            <th>Training Time</th>
+                            <th>Complexity</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span style="color: var(--color-lr); font-weight: bold;">Linear Regression</span></td>
+                            <td>0.870</td>
+                            <td>0.245</td>
+                            <td><span class="star-rating">⚡⚡⚡⚡⚡</span> Fast</td>
+                            <td>Simple</td>
+                        </tr>
+                        <tr>
+                            <td><span style="font-weight: bold;">Decision Tree</span></td>
+                            <td>0.851</td>
+                            <td>0.267</td>
+                            <td><span class="star-rating">⚡⚡⚡⚡⚡</span> Fast</td>
+                            <td>Simple</td>
+                        </tr>
+                        <tr style="background: #e8f5e9;">
+                            <td><span style="color: var(--color-rf); font-weight: bold;">🌲 Random Forest</span></td>
+                            <td><strong>0.904</strong></td>
+                            <td><strong>0.213</strong></td>
+                            <td><span class="star-rating">⚡⚡⚡</span> Medium</td>
+                            <td>Moderate</td>
+                        </tr>
+                        <tr style="background: #fff3e0;">
+                            <td><span style="color: var(--color-gb); font-weight: bold;">🚀 Gradient Boosting</span></td>
+                            <td><strong>0.921</strong></td>
+                            <td><strong>0.192</strong></td>
+                            <td><span class="star-rating">⚡⚡</span> Slow</td>
+                            <td>Complex</td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <div class="highlight-box" style="margin-top: 2em;">
+                    <p style="text-align: center; margin: 0; font-size: 1.3em;">
+                        <strong>Observation:</strong> Ensemble methods consistently outperform single models!
+                    </p>
+                </div>
+            </section>
+
+            <!-- Slide 11: Feature Importance -->
+            <section>
+                <h2>🔍 Feature Importance: Business Insights</h2>
+                
+                <p style="font-size: 1.1em;">What REALLY drives avocado demand?</p>
+                
+                <div style="margin: 2em 0;">
+                    <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                        <div style="width: 60%; background: var(--color-rf); height: 30px; border-radius: 5px;"></div>
+                        <span style="margin-left: 15px; font-weight: bold;">Price (0.35)</span>
+                    </div>
+                    <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                        <div style="width: 45%; background: var(--color-gb); height: 30px; border-radius: 5px;"></div>
+                        <span style="margin-left: 15px;">Region: West (0.22)</span>
+                    </div>
+                    <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                        <div style="width: 30%; background: var(--color-lr); height: 30px; border-radius: 5px;"></div>
+                        <span style="margin-left: 15px;">Year (0.18)</span>
+                    </div>
+                    <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                        <div style="width: 25%; background: #95a5a6; height: 30px; border-radius: 5px;"></div>
+                        <span style="margin-left: 15px;">Peak Season (0.15)</span>
+                    </div>
+                    <div style="display: flex; align-items: center;">
+                        <div style="width: 10%; background: #bdc3c7; height: 30px; border-radius: 5px;"></div>
+                        <span style="margin-left: 15px;">Other Regions (0.10)</span>
+                    </div>
+                </div>
+                
+                <div class="warning-box">
+                    <strong>💡 Business Value:</strong>
+                    <ul style="margin: 0.5em 0;">
+                        <li>Focus data quality efforts on important features</li>
+                        <li>Price is critical but regional differences matter!</li>
+                        <li>Seasonality has clear impact on demand</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Slide 12: Integration with Optimization -->
+            <section>
+                <h2>Integration with Optimization</h2>
+                <h3>The Critical Link: ML → Optimization</h3>
+                
+                <div class="code-example" style="font-size: 0.65em;">
+<pre><code class="language-python"># Optimization Problem
+maximize: Σ(price_r × sales_r - waste_cost × waste_r - transport_cost_r × supply_r)
+
+subject to:
+    Σ supply_r = B                      # Total supply constraint
+    sales_r ≤ supply_r                  # Can't sell more than we have
+    sales_r ≤ demand_r(price_r)         # ← ML MODEL PREDICTS THIS!
+    waste_r = supply_r - sales_r        # Wastage definition
+</code></pre>
+                </div>
+                
+                <div style="margin: 2em 0; padding: 20px; background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); border-radius: 15px; color: white;">
+                    <h3 style="color: white; margin-top: 0;">Where ML Meets Optimization</h3>
+                    <p style="font-size: 1.2em; margin: 0;">
+                        The <strong>demand_r(price_r)</strong> function comes from our trained ML model!<br>
+                        <em>Better predictions → More accurate demand → Better optimal decisions</em>
+                    </p>
+                </div>
+                
+                <p style="text-align: center; font-size: 1.3em; margin-top: 1em;">
+                    Decision Variables: <span style="color: var(--color-accent);">price</span>, 
+                    <span style="color: var(--color-rf);">supply</span>, 
+                    <span style="color: var(--color-gb);">sales</span>
+                </p>
+            </section>
+
+            <!-- Slide 13: Gurobi ML -->
+            <section>
+                <h2>Gurobi Machine Learning Magic ✨</h2>
+                
+                <div class="code-example">
+<pre><code class="language-python">from gurobi_ml import add_predictor_constr
+
+# Embed trained sklearn model DIRECTLY into optimization!
+pred_constr = add_predictor_constr(
+    model=m,                    # Gurobi optimization model
+    predictor=rf_pipeline,      # Your trained sklearn pipeline
+    input_vars=features,        # Decision variables (price, region, year, peak)
+    output_vars=demand          # Predicted demand variables
+)
+
+# Gurobi converts ML model into linear constraints it can solve!
+pred_constr.print_stats()
+</code></pre>
+                </div>
+                
+                <div style="margin-top: 2em;">
+                    <h3>What Happens Behind the Scenes:</h3>
+                    <ol style="line-height: 1.8;">
+                        <li><strong>Parse ML Model:</strong> Gurobi ML reads your trained sklearn model</li>
+                        <li><strong>Convert to Constraints:</strong> Translates tree logic into linear inequalities</li>
+                        <li><strong>Integrate:</strong> Adds these constraints to your optimization model</li>
+                        <li><strong>Solve:</strong> Gurobi finds optimal decision variables!</li>
+                    </ol>
+                </div>
+                
+                <p style="text-align: center; font-size: 1.2em; color: var(--color-rf); margin-top: 1em;">
+                    <strong>Result:</strong> Seamless integration of ML predictions with optimization! 🎯
+                </p>
+            </section>
+
+            <!-- Slide 14: THE BIG REVEAL -->
+            <section class="center" data-background-color="#667eea">
+                <h2 style="color: white;">🎯 THE BIG REVEAL</h2>
+                <h3 style="color: white;">Does Better Prediction = Better Decisions?</h3>
+                
+                <table style="width: 90%; margin: 2em auto; background: white; border-radius: 10px; overflow: hidden;">
+                    <thead>
+                        <tr style="background: var(--color-dark);">
+                            <th style="padding: 15px; color: white;">Model</th>
+                            <th style="padding: 15px; color: white;">Test R²</th>
+                            <th style="padding: 15px; color: white;">Optimal Revenue ($M)</th>
+                            <th style="padding: 15px; color: white;">Improvement</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="fragment">
+                            <td style="padding: 15px; font-weight: bold;">Linear Regression</td>
+                            <td style="padding: 15px;">0.870</td>
+                            <td style="padding: 15px;">$24.50 M</td>
+                            <td style="padding: 15px;">— (baseline)</td>
+                        </tr>
+                        <tr class="fragment" style="background: #e8f5e9;">
+                            <td style="padding: 15px; font-weight: bold; color: var(--color-rf);">Random Forest</td>
+                            <td style="padding: 15px;">0.904</td>
+                            <td style="padding: 15px;">$25.20 M</td>
+                            <td style="padding: 15px; color: var(--color-rf); font-weight: bold;">+$0.70 M (+2.9%)</td>
+                        </tr>
+                        <tr class="fragment" style="background: #fff3e0;">
+                            <td style="padding: 15px; font-weight: bold; color: var(--color-gb);">Gradient Boosting</td>
+                            <td style="padding: 15px;">0.921</td>
+                            <td style="padding: 15px;">$25.45 M</td>
+                            <td style="padding: 15px; color: var(--color-gb); font-weight: bold;">+$0.95 M (+3.9%)</td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <div class="fragment" style="background: white; padding: 30px; border-radius: 15px; margin-top: 1em;">
+                    <p style="font-size: 1.5em; color: var(--color-accent); margin: 0; font-weight: bold;">
+                        Annual Impact: $0.95M × 52 weeks = <span style="font-size: 1.3em;">$49.4M/year!</span> 💰
+                    </p>
+                </div>
+            </section>
+
+            <!-- Slide 15: Price Comparison -->
+            <section>
+                <h2>How Do Optimal Prices Differ?</h2>
+                <p>Different ML models → Different pricing strategies</p>
+                
+                <div style="margin: 2em 0; font-size: 0.85em;">
+                    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 10px; font-weight: bold;">
+                        <div>Region</div>
+                        <div style="color: var(--color-lr);">Linear Reg</div>
+                        <div style="color: var(--color-rf);">Random Forest</div>
+                        <div style="color: var(--color-gb);">Gradient Boost</div>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; padding: 10px; background: var(--color-light); border-radius: 5px; margin-bottom: 5px;">
+                        <div>Northeast</div>
+                        <div>$1.82</div>
+                        <div>$1.85</div>
+                        <div>$1.87</div>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; padding: 10px; background: white; border-radius: 5px; margin-bottom: 5px;">
+                        <div>Midsouth</div>
+                        <div>$1.42</div>
+                        <div>$1.45</div>
+                        <div>$1.48</div>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; padding: 10px; background: var(--color-light); border-radius: 5px; margin-bottom: 5px;">
+                        <div>West</div>
+                        <div>$1.55</div>
+                        <div>$1.58</div>
+                        <div>$1.60</div>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; padding: 10px; background: white; border-radius: 5px;">
+                        <div>Southeast</div>
+                        <div>$1.38</div>
+                        <div>$1.40</div>
+                        <div>$1.43</div>
+                    </div>
+                </div>
+                
+                <div class="highlight-box" style="margin-top: 2em;">
+                    <p style="font-size: 1.2em; margin: 0;">
+                        <strong>Key Insight:</strong> Models capture different demand patterns →<br>
+                        Lead to different optimal prices → Result in different revenue outcomes
+                    </p>
+                </div>
+            </section>
+
+            <!-- Slide 16: The Plot Twist -->
+            <section class="center">
+                <h2>🎭 The Plot Twist</h2>
+                <h3 style="color: var(--color-accent);">When Simpler is Better</h3>
+                
+                <div style="margin: 2em 0; font-size: 1.2em;">
+                    <p class="fragment">If <span style="color: var(--color-gb); font-weight: bold;">Gradient Boosting</span> gives highest revenue...</p>
+                    <p class="fragment" style="font-size: 1.5em; margin: 1em 0;">Should we ALWAYS use it? 🤔</p>
+                </div>
+                
+                <div class="two-column fragment">
+                    <div style="background: #e3f2fd; padding: 20px; border-radius: 10px;">
+                        <strong style="color: var(--color-gb);">Gradient Boosting:</strong>
+                        <ul>
+                            <li>96% of max revenue</li>
+                            <li>10 minute solve time</li>
+                            <li>Complex maintenance</li>
+                            <li>Hard to explain</li>
+                        </ul>
+                    </div>
+                    <div style="background: #fff3e0; padding: 20px; border-radius: 10px;">
+                        <strong style="color: var(--color-lr);">Linear Regression:</strong>
+                        <ul>
+                            <li>91% of max revenue</li>
+                            <li>5 second solve time</li>
+                            <li>Easy to maintain</li>
+                            <li>Easy to explain to CFO</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="fragment highlight-box" style="margin-top: 2em;">
+                    <p style="font-size: 1.3em; margin: 0;">
+                        <strong>The "Good Enough" Principle:</strong><br>
+                        Is 5% more revenue worth 10× the complexity?
+                    </p>
+                </div>
+            </section>
+
+            <!-- Slide 17: Trade-off Matrix -->
+            <section>
+                <h2>⚖️ The Trade-off Matrix</h2>
+                
+                <table class="model-comparison">
+                    <thead>
+                        <tr>
+                            <th>Dimension</th>
+                            <th style="color: var(--color-lr);">Linear Reg</th>
+                            <th style="color: var(--color-rf);">Random Forest</th>
+                            <th style="color: var(--color-gb);">Gradient Boost</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Prediction Accuracy</strong></td>
+                            <td><span class="star-rating">⭐⭐⭐</span></td>
+                            <td><span class="star-rating">⭐⭐⭐⭐</span></td>
+                            <td><span class="star-rating">⭐⭐⭐⭐⭐</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Optimization Speed</strong></td>
+                            <td><span class="star-rating">⭐⭐⭐⭐⭐</span></td>
+                            <td><span class="star-rating">⭐⭐⭐</span></td>
+                            <td><span class="star-rating">⭐⭐</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Interpretability</strong></td>
+                            <td><span class="star-rating">⭐⭐⭐⭐⭐</span></td>
+                            <td><span class="star-rating">⭐⭐⭐</span></td>
+                            <td><span class="star-rating">⭐⭐⭐</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Maintenance Burden</strong></td>
+                            <td><span class="star-rating">⭐⭐⭐⭐⭐</span></td>
+                            <td><span class="star-rating">⭐⭐⭐</span></td>
+                            <td><span class="star-rating">⭐⭐</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Stakeholder Trust</strong></td>
+                            <td><span class="star-rating">⭐⭐⭐⭐⭐</span></td>
+                            <td><span class="star-rating">⭐⭐⭐</span></td>
+                            <td><span class="star-rating">⭐⭐</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <div class="highlight-box" style="margin-top: 2em;">
+                    <p style="font-size: 1.3em; text-align: center; margin: 0;">
+                        <strong>Key Insight:</strong> Best model ≠ Most complex model!
+                    </p>
+                </div>
+            </section>
+
+            <!-- Slide 18: Business Case -->
+            <section>
+                <h2>💰 Business Case Analysis</h2>
+                <h3>VP asks: "Is upgrading to Random Forest worth $50K/year?"</h3>
+                
+                <div class="two-column" style="margin: 2em 0;">
+                    <div>
+                        <strong>📊 Revenue Impact:</strong>
+                        <ul style="line-height: 2;">
+                            <li>Weekly improvement: $0.70M</li>
+                            <li>Annual improvement: $36.4M</li>
+                        </ul>
+                        
+                        <strong style="margin-top: 1em; display: block;">💸 Costs:</strong>
+                        <ul style="line-height: 2;">
+                            <li>Implementation: $0.05M</li>
+                            <li>Annual maintenance: $0.05M</li>
+                        </ul>
+                    </div>
+                    
+                    <div>
+                        <strong>📈 Financial Metrics:</strong>
+                        <ul style="line-height: 2;">
+                            <li>Net benefit (Year 1): <span style="color: var(--color-rf); font-weight: bold;">$36.3M</span></li>
+                            <li>ROI: <span style="color: var(--color-rf); font-weight: bold;">72,600%</span></li>
+                            <li>Payback: <span style="color: var(--color-rf); font-weight: bold;">0.4 months</span></li>
+                        </ul>
+                        
+                        <div style="background: #e8f5e9; padding: 15px; border-radius: 10px; margin-top: 1em;">
+                            <strong>🎯 Recommendation:</strong>
+                            <p style="margin: 0.5em 0;"><span style="color: var(--color-rf); font-size: 1.5em;">✅ PROCEED</span></p>
+                            <p style="margin: 0; font-size: 0.9em;">Project pays for itself in less than 2 weeks!</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="warning-box">
+                    <strong>🔬 Sensitivity Analysis:</strong>
+                    Even at 50% of predicted improvement, ROI is still over 36,000%!
+                </div>
+            </section>
+
+            <!-- Slide 19: Decision Framework -->
+            <section>
+                <h2>🎯 Decision Framework: When to Use What?</h2>
+                
+                <div style="margin: 2em 0;">
+                    <div style="background: #e3f2fd; padding: 20px; border-radius: 10px; margin-bottom: 1em;">
+                        <strong style="color: var(--color-lr); font-size: 1.2em;">Use Linear Regression if:</strong>
+                        <ul>
+                            <li>Need to explain every decision to CFO</li>
+                            <li>Real-time optimization required (< 1 sec)</li>
+                            <li>Limited ML expertise on team</li>
+                            <li>Relationships approximately linear</li>
+                        </ul>
+                    </div>
+                    
+                    <div style="background: #e8f5e9; padding: 20px; border-radius: 10px; margin-bottom: 1em;">
+                        <strong style="color: var(--color-rf); font-size: 1.2em;">Use Random Forest if:</strong>
+                        <ul>
+                            <li>Clear non-linear patterns in data</li>
+                            <li>Medium-scale problem (10-100 decisions)</li>
+                            <li>Feature importance insights valuable</li>
+                            <li>Good balance of accuracy & interpretability needed</li>
+                        </ul>
+                    </div>
+                    
+                    <div style="background: #fff3e0; padding: 20px; border-radius: 10px;">
+                        <strong style="color: var(--color-gb); font-size: 1.2em;">Use Gradient Boosting if:</strong>
+                        <ul>
+                            <li>Maximum accuracy is paramount</li>
+                            <li>Infrequent optimization (monthly/quarterly)</li>
+                            <li>Strong ML team available</li>
+                            <li>Business impact of small improvements is massive</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 20: Real-World Considerations -->
+            <section>
+                <h2>🌍 Real-World Considerations</h2>
+                
+                <div class="two-column">
+                    <div>
+                        <h3>Computational Constraints</h3>
+                        <p>100 trees × 10 splits = <strong>1,000+ constraints</strong></p>
+                        <p>Can make optimization intractable for large-scale problems</p>
+                        
+                        <h3 style="margin-top: 1em;">Model Maintenance</h3>
+                        <ul>
+                            <li>Complex models need frequent retraining</li>
+                            <li>Hyperparameters need tuning</li>
+                            <li>Monitor for model drift</li>
+                        </ul>
+                    </div>
+                    
+                    <div>
+                        <h3>Explainability Challenge</h3>
+                        <div style="background: #ffebee; padding: 15px; border-radius: 10px; margin-bottom: 1em;">
+                            <strong>CFO:</strong> "Why is Northeast price $1.85?"
+                        </div>
+                        
+                        <div style="background: #e8f5e9; padding: 15px; border-radius: 10px; margin-bottom: 1em;">
+                            <strong style="color: var(--color-lr);">Linear Reg:</strong> "For every $0.10 increase, demand drops by X units"
+                        </div>
+                        
+                        <div style="background: #fff3e0; padding: 15px; border-radius: 10px;">
+                            <strong style="color: var(--color-rf);">Random Forest:</strong> "Um... 100 trees voted and..."
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="warning-box" style="margin-top: 1.5em;">
+                    <p style="margin: 0; font-size: 1.1em;">
+                        <strong>Remember:</strong> Production systems need MORE than just accuracy!
+                    </p>
+                </div>
+            </section>
+
+            <!-- Slide 21: Ethical Considerations -->
+            <section>
+                <h2>⚖️ Ethical Considerations</h2>
+                
+                <div class="highlight-box" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                    <h3 style="color: white;">Scenario: Differential Pricing</h3>
+                    <p style="color: white; margin: 0;">
+                        Model sets Northeast price at <strong>$1.85</strong>, Midsouth at <strong>$1.45</strong>
+                    </p>
+                </div>
+                
+                <h3 style="margin-top: 1.5em;">Questions to Consider:</h3>
+                <ul style="line-height: 2; font-size: 1.1em;">
+                    <li class="fragment">Is this differential pricing fair?</li>
+                    <li class="fragment">What if regions correlate with income or demographics?</li>
+                    <li class="fragment">Are we optimizing for profit at expense of equity?</li>
+                    <li class="fragment">Should we add fairness constraints to optimization?</li>
+                </ul>
+                
+                <div class="fragment warning-box" style="margin-top: 2em;">
+                    <p style="margin: 0; font-size: 1.2em; text-align: center;">
+                        <strong>Our Responsibility:</strong> Not just THAT models are accurate,<br>
+                        but <em>HOW</em> they're used! 🌟
+                    </p>
+                </div>
+            </section>
+
+            <!-- Slide 22: Common Pitfalls -->
+            <section>
+                <h2>🚨 Common Pitfalls</h2>
+                
+                <div style="margin: 2em 0;">
+                    <div style="display: grid; grid-template-columns: 2fr 3fr; gap: 20px; margin-bottom: 1.5em;">
+                        <div style="background: #ffebee; padding: 15px; border-radius: 10px;">
+                            <strong>❌ Overfitting</strong>
+                        </div>
+                        <div style="padding: 15px;">
+                            Great training, poor testing → Use cross-validation, reduce complexity
+                        </div>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: 2fr 3fr; gap: 20px; margin-bottom: 1.5em;">
+                        <div style="background: #fff3e0; padding: 15px; border-radius: 10px;">
+                            <strong>❌ Extrapolation</strong>
+                        </div>
+                        <div style="padding: 15px;">
+                            Model suggests $0.50 price → Set realistic bounds, validate ranges
+                        </div>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: 2fr 3fr; gap: 20px; margin-bottom: 1.5em;">
+                        <div style="background: #e3f2fd; padding: 15px; border-radius: 10px;">
+                            <strong>❌ Metric Myopia</strong>
+                        </div>
+                        <div style="padding: 15px;">
+                            Focus only on R² → Always calculate business impact (revenue, cost)
+                        </div>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: 2fr 3fr; gap: 20px;">
+                        <div style="background: #f3e5f5; padding: 15px; border-radius: 10px;">
+                            <strong>❌ Ignoring Solve Time</strong>
+                        </div>
+                        <div style="padding: 15px;">
+                            10 min optimization → Consider simpler model or less frequent runs
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="highlight-box" style="margin-top: 2em;">
+                    <p style="margin: 0; font-size: 1.2em;">
+                        <strong>Prevention:</strong> Validate thoroughly, monitor in production, think business context!
+                    </p>
+                </div>
+            </section>
+
+            <!-- Slide 23: Best Practices -->
+            <section>
+                <h2>✅ Best Practices Checklist</h2>
+                
+                <ul class="checklist" style="font-size: 1.1em; line-height: 2;">
+                    <li>Start simple, add complexity only if justified</li>
+                    <li>Connect every metric to business value (R² → Revenue)</li>
+                    <li>Calculate ROI before implementation</li>
+                    <li>Consider: accuracy, speed, interpretability, maintenance</li>
+                    <li>Build stakeholder trust through transparency</li>
+                    <li>Monitor model performance in production</li>
+                    <li>Plan for retraining and model drift</li>
+                    <li>Think ethically about model applications</li>
+                </ul>
+                
+                <div style="margin-top: 2em; padding: 30px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 15px; color: white; text-align: center;">
+                    <p style="font-size: 1.5em; margin: 0;">
+                        <strong>Golden Rule:</strong><br>
+                        Production-ready > Kaggle-winner
+                    </p>
+                </div>
+            </section>
+
+            <!-- Slide 24: Prescriptive Analytics Mindset -->
+            <section>
+                <h2>🎯 The Prescriptive Analytics Mindset</h2>
+                
+                <div class="two-column" style="margin: 2em 0;">
+                    <div style="background: #ffebee; padding: 30px; border-radius: 10px;">
+                        <h3 style="color: #d32f2f; margin-top: 0;">❌ Wrong Approach</h3>
+                        <p style="font-size: 1.2em; font-style: italic;">
+                            "I built the most accurate model! R² = 0.99!"
+                        </p>
+                    </div>
+                    
+                    <div style="background: #e8f5e9; padding: 30px; border-radius: 10px;">
+                        <h3 style="color: #388e3c; margin-top: 0;">✅ Right Approach</h3>
+                        <p style="font-size: 1.2em; font-style: italic;">
+                            "I improved revenue by $2M/year using a model stakeholders trust, solves in 5 seconds, and is easy to maintain. R² = 0.92."
+                        </p>
+                    </div>
+                </div>
+                
+                <h3 style="margin-top: 2em;">Remember:</h3>
+                <div style="font-size: 1.2em; line-height: 2;">
+                    <p>1. <strong>Better decisions</strong> > Better predictions</p>
+                    <p>2. <strong>Business context</strong> > Technical metrics</p>
+                    <p>3. <strong>Stakeholder trust</strong> > Model complexity</p>
+                    <p>4. <strong>Long-term maintenance</strong> > Short-term accuracy gains</p>
+                </div>
+            </section>
+
+            <!-- Slide 25: Key Takeaways -->
+            <section>
+                <h2>🎓 Key Takeaways</h2>
+                
+                <div style="margin: 2em 0;">
+                    <div style="background: var(--color-light); padding: 20px; border-radius: 10px; margin-bottom: 1em;">
+                        <strong>1. Tree-Based Ensembles Are Powerful</strong>
+                        <ul>
+                            <li>Random Forest: Parallel trees, reduce variance</li>
+                            <li>Gradient Boosting: Sequential trees, learn from errors</li>
+                            <li>Both significantly outperform single models</li>
+                        </ul>
+                    </div>
+                    
+                    <div style="background: var(--color-light); padding: 20px; border-radius: 10px; margin-bottom: 1em;">
+                        <strong>2. Better Predictions Lead to Better Decisions</strong>
+                        <ul>
+                            <li>We proved this with real optimization results!</li>
+                            <li>But gains diminish (law of diminishing returns)</li>
+                        </ul>
+                    </div>
+                    
+                    <div style="background: var(--color-light); padding: 20px; border-radius: 10px; margin-bottom: 1em;">
+                        <strong>3. Integration Is Seamless with Gurobi ML</strong>
+                        <ul>
+                            <li><code>add_predictor_constr</code> handles the complexity</li>
+                            <li>Supports sklearn pipelines directly</li>
+                        </ul>
+                    </div>
+                    
+                    <div style="background: var(--color-light); padding: 20px; border-radius: 10px;">
+                        <strong>4. Context Determines "Best" Model</strong>
+                        <ul>
+                            <li>Accuracy vs. Speed vs. Interpretability vs. Maintenance</li>
+                            <li>Always connect to business outcomes</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 26: Advanced Topics -->
+            <section>
+                <h2>🚀 Advanced Topics (Optional Reading)</h2>
+                
+                <div class="two-column">
+                    <div>
+                        <h3>Hyperparameter Tuning</h3>
+                        <ul>
+                            <li>GridSearchCV</li>
+                            <li>RandomizedSearchCV</li>
+                            <li>Cross-validation strategies</li>
+                        </ul>
+                        
+                        <h3 style="margin-top: 1em;">Optimized Implementations</h3>
+                        <ul>
+                            <li>XGBoost</li>
+                            <li>LightGBM</li>
+                            <li>CatBoost</li>
+                        </ul>
+                    </div>
+                    
+                    <div>
+                        <h3>Model Interpretability</h3>
+                        <ul>
+                            <li>SHAP values</li>
+                            <li>LIME</li>
+                            <li>Partial dependence plots</li>
+                        </ul>
+                        
+                        <h3 style="margin-top: 1em;">Advanced Optimization</h3>
+                        <ul>
+                            <li>Stochastic optimization</li>
+                            <li>Robust optimization</li>
+                            <li>Multi-stage problems</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="highlight-box" style="margin-top: 2em;">
+                    <p style="margin: 0; font-size: 1.1em;">
+                        These topics go beyond tonight's scope but are valuable for advanced practitioners!
+                    </p>
+                </div>
+            </section>
+
+            <!-- Slide 27: Critical Thinking -->
+            <section>
+                <h2>💭 Critical Thinking Questions</h2>
+                
+                <div style="margin: 2em 0; font-size: 1.1em;">
+                    <div class="warning-box" style="margin-bottom: 1.5em;">
+                        <strong>Q1:</strong> When is 85% accuracy better than 95% accuracy?
+                    </div>
+                    
+                    <div class="warning-box" style="margin-bottom: 1.5em;">
+                        <strong>Q2:</strong> How do you explain a "black box" model to skeptical executives?
+                    </div>
+                    
+                    <div class="warning-box" style="margin-bottom: 1.5em;">
+                        <strong>Q3:</strong> What's the cost of a false positive vs. false negative in pricing?
+                    </div>
+                    
+                    <div class="warning-box" style="margin-bottom: 1.5em;">
+                        <strong>Q4:</strong> How would you detect model drift in production?
+                    </div>
+                    
+                    <div class="warning-box">
+                        <strong>Q5:</strong> Is optimization always ethical? When should you add fairness constraints?
+                    </div>
+                </div>
+                
+                <p style="text-align: center; font-size: 1.3em; margin-top: 2em; color: var(--color-accent);">
+                    <strong>Discuss with your neighbor for 3 minutes! 🗣️</strong>
+                </p>
+            </section>
+
+            <!-- Slide 28: Resources -->
+            <section>
+                <h2>📚 Resources</h2>
+                
+                <div class="two-column">
+                    <div>
+                        <h3>Documentation</h3>
+                        <ul style="font-size: 0.9em;">
+                            <li><a href="https://gurobi-machinelearning.readthedocs.io/">Gurobi ML Docs</a></li>
+                            <li><a href="https://scikit-learn.org/stable/modules/ensemble.html">Scikit-learn Ensembles</a></li>
+                            <li><a href="https://github.com/Gurobi/gurobipy-pandas">Gurobipy-pandas</a></li>
+                        </ul>
+                        
+                        <h3 style="margin-top: 1em;">Research Papers</h3>
+                        <ul style="font-size: 0.9em;">
+                            <li>Breiman (2001): "Random Forests"</li>
+                            <li>Friedman (2001): "Gradient Boosting Machine"</li>
+                        </ul>
+                    </div>
+                    
+                    <div>
+                        <h3>Practice</h3>
+                        <ul style="font-size: 0.9em;">
+                            <li>Kaggle competitions</li>
+                            <li>UCI ML Repository</li>
+                            <li>Your own business problems!</li>
+                        </ul>
+                        
+                        <h3 style="margin-top: 1em;">Books</h3>
+                        <ul style="font-size: 0.9em;">
+                            <li>"Elements of Statistical Learning"</li>
+                            <li>"Hands-On Machine Learning"</li>
+                            <li>"Optimization in Operations Research"</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 29: Homework -->
+            <section>
+                <h2>📝 Homework Options</h2>
+                <p>Choose ONE of the following:</p>
+                
+                <div style="margin: 2em 0;">
+                    <div style="background: var(--color-light); padding: 20px; border-radius: 10px; margin-bottom: 1em;">
+                        <strong>Option 1: Model Comparison Report</strong>
+                        <p>Compare LR, RF, GB on a new dataset. Include prediction metrics, optimization results, and business case.</p>
+                    </div>
+                    
+                    <div style="background: var(--color-light); padding: 20px; border-radius: 10px; margin-bottom: 1em;">
+                        <strong>Option 2: Hyperparameter Tuning</strong>
+                        <p>Use GridSearchCV on Random Forest. Analyze if tuning improves optimization results. Is the computational cost worth it?</p>
+                    </div>
+                    
+                    <div style="background: var(--color-light); padding: 20px; border-radius: 10px; margin-bottom: 1em;">
+                        <strong>Option 3: Real-World Application</strong>
+                        <p>Apply this framework to a problem in your industry (retail, manufacturing, finance, healthcare, etc.)</p>
+                    </div>
+                    
+                    <div style="background: var(--color-light); padding: 20px; border-radius: 10px;">
+                        <strong>Option 4: Ethical Analysis</strong>
+                        <p>Write a 2-page memo on ethical considerations in prescriptive analytics (fairness, transparency, responsibility)</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 30: Closing Quote -->
+            <section class="center">
+                <div class="emoji-large">🎯</div>
+                <div class="quote" style="margin: 2em auto; max-width: 800px;">
+                    "The goal of prescriptive analytics is not to build the fanciest model, but to make the best decision."
+                </div>
+                
+                <h3 style="margin-top: 2em;">Tonight You Learned:</h3>
+                <ul class="checklist" style="display: inline-block; text-align: left; font-size: 1.1em;">
+                    <li>How tree-based ensemble methods work</li>
+                    <li>When to use RF vs. GB vs. Linear Regression</li>
+                    <li>How to integrate ML with optimization</li>
+                    <li>How to think critically about model selection</li>
+                    <li>How to evaluate through a business lens</li>
+                </ul>
+            </section>
+
+            <!-- Slide 31: Thank You -->
+            <section class="center" data-background-gradient="linear-gradient(135deg, #667eea 0%, #764ba2 100%)">
+                <h1 style="color: white; font-size: 3em;">Thank You! 🎉</h1>
+                <p style="color: white; font-size: 1.5em; margin: 2em 0;">
+                    Questions?
+                </p>
+                
+                <div style="background: white; padding: 30px; border-radius: 15px; margin: 2em auto; max-width: 600px;">
+                    <p style="margin: 0.5em 0;"><strong>Office Hours:</strong> [Your schedule]</p>
+                    <p style="margin: 0.5em 0;"><strong>Email:</strong> [Your email]</p>
+                    <p style="margin: 0.5em 0;"><strong>Course:</strong> ISOM 839</p>
+                </div>
+                
+                <p style="color: white; font-size: 1.3em; margin-top: 2em;">
+                    <strong>See you next week!</strong>
+                </p>
+                
+                <p style="color: #ddd; margin-top: 3em; font-size: 0.9em;">
+                    Press ESC to see slide overview | Press ? for help
+                </p>
+            </section>
+
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/reveal.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/plugin/notes/notes.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/plugin/highlight/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/plugin/zoom/zoom.min.js"></script>
+    
+    <script>
+        Reveal.initialize({
+            hash: true,
+            controls: true,
+            progress: true,
+            center: false,
+            transition: 'slide',
+            transitionSpeed: 'default',
+            backgroundTransition: 'fade',
+            slideNumber: 'c/t',
+            showSlideNumber: 'all',
+            plugins: [ RevealHighlight, RevealNotes, RevealZoom ],
+            
+            // Better responsive settings
+            width: '100%',
+            height: '100%',
+            margin: 0.04,
+            minScale: 0.2,
+            maxScale: 2.0,
+            
+            // Keyboard shortcuts
+            keyboard: {
+                27: function() { Reveal.toggleOverview(); },  // ESC for overview
+            },
+            
+            // Mobile optimizations
+            touch: true,
+            embedded: false,
+            
+            // PDF export settings
+            pdfMaxPagesPerSlide: 1,
+            pdfSeparateFragments: false,
+        });
+    </script>
+</body>
+</html>
